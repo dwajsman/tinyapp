@@ -49,6 +49,15 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+app.get("/u/:shortURL", (req, res) => {
+  let key = req.params.shortURL;
+  let longURL = urlDatabase[key];
+  if (!urlDatabase[key]) {
+    return res.redirect('/');
+  }
+  res.redirect(longURL);
+
+});
 
 
 
@@ -57,10 +66,10 @@ let generateRandomString = function() {
   let random_ascii;
   for(let i = 0; i < 6; i++) {
     random_ascii = Math.floor((Math.random() * 25) + 97);
-    random_string += String.fromCharCode(random_ascii)
-  };
+    random_string += String.fromCharCode(random_ascii);
+  }
   return random_string;
-}
+};
 
 
 
