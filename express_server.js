@@ -6,7 +6,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 app.set("view engine", "ejs");
 
-const urlDatabase = {
+const urlDatabase = { 
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
@@ -14,7 +14,9 @@ const urlDatabase = {
 
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  // res.send("Hello!");
+  res.redirect('/urls');
+
 });
 
 app.listen(PORT, () => {
@@ -39,9 +41,11 @@ app.get("/urls", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  //console.log(req.body);  // Log the POST request body to the console
-  urlDatabase[generateRandomString()] = req.body["longURL"];
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  console.log(req.body);  // Log the POST request body to the console
+  let key = generateRandomString()
+  urlDatabase[key] = req.body["longURL"];
+  //res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  res.redirect('/urls/' + key);
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
@@ -55,6 +59,17 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { shortURL: req.params.shortURL, longURL: req.params.longURL };
   res.render("urls_show", templateVars);
+
+});
+
+app.post("/urls/:shortURL", (req, res) => {
+  //const templateVars = { shortURL: req.params.shortURL, longURL: req.params.longURL };
+  //res.render("urls_show", templateVars);
+  // console.log(req.params.shortURL);
+  // console.log(req.body.newUrl);
+  // console.log(urlDatabase);
+  urlDatabase[req.params.shortURL] = req.body.newUrl;
+  res.redirect('/urls');
 });
 
 app.get("/u/:shortURL", (req, res) => {
