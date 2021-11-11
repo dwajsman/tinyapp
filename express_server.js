@@ -7,9 +7,21 @@ const PORT = 8080; // default port 8080
 
 
 app.use(cookieParser());
-app.use(bodyParser.urlencoded({ extended: true }));
+// app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: false }));
 app.set("view engine", "ejs");
+app.use(express.static("public")); // Static files (css / images)
+// app.use(app.router);
 
+
+
+// ██████╗ ██████╗
+// ██╔══██╗██╔══██╗
+// ██║  ██║██████╔╝
+// ██║  ██║██╔══██╗
+// ██████╔╝██████╔╝
+// ╚═════╝ ╚═════╝
+                
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -17,17 +29,41 @@ const urlDatabase = {
 };
 
 const users = {
-  "a2kj": {
-    id: "a2kj",
+  "a2kjc3": {
+    id: "a2kjc3",
     email: "bill@microsoft.com",
     password: "vaccinechip"
   },
-  "9dds": {
-    id: "9dds",
+  "9dds3e": {
+    id: "9dds3e",
     email: "steve@apple.com",
     password: "windowssuks"
   }
 };
+let user;
+// find user by email
+function userByEmail(users, email) {
+  for (const user_id in users) {
+    if (Object.hasOwnProperty.call(users, user_id)) {
+      const user = users[user_id];
+      if (email === user["email"]) {
+        return user_id;
+      };
+    };
+  };
+};
+
+
+
+
+// ██╗███╗   ██╗██████╗ ███████╗██╗  ██╗
+// ██║████╗  ██║██╔══██╗██╔════╝╚██╗██╔╝
+// ██║██╔██╗ ██║██║  ██║█████╗   ╚███╔╝ 
+// ██║██║╚██╗██║██║  ██║██╔══╝   ██╔██╗ 
+// ██║██║ ╚████║██████╔╝███████╗██╔╝ ██╗
+// ╚═╝╚═╝  ╚═══╝╚═════╝ ╚══════╝╚═╝  ╚═╝
+                                     
+
 
 app.get("/", (req, res) => {
   res.redirect('/urls');
@@ -50,30 +86,76 @@ app.get("/urls/new", (req, res) => {
 // });
 
 app.get("/urls", (req, res) => {
-  const templateVars = {  
+  const templateVars = {
     urls: urlDatabase,
-    username: req.cookies["username"],
+    user,
   };
   res.render("urls_index", templateVars);
 });
 
+
+// ██████╗ ███████╗ ██████╗ ██╗███████╗████████╗███████╗██████╗
+// ██╔══██╗██╔════╝██╔════╝ ██║██╔════╝╚══██╔══╝██╔════╝██╔══██╗
+// ██████╔╝█████╗  ██║  ███╗██║███████╗   ██║   █████╗  ██████╔╝
+// ██╔══██╗██╔══╝  ██║   ██║██║╚════██║   ██║   ██╔══╝  ██╔══██╗
+// ██║  ██║███████╗╚██████╔╝██║███████║   ██║   ███████╗██║  ██║
+// ╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝╚══════╝   ╚═╝   ╚══════╝╚═╝  ╚═╝
+                                                             
 app.get("/register", (req, res) => {
   const templateVars = {
     email: users,
     password: users,
     urls: urlDatabase,
-    username: req.cookies["username"],
+    user,
   };
   res.render("registration", templateVars);
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body); // Log the POST request body to the console
-  let key = generateRandomString()
+  let key = generateRandomString();
   urlDatabase[key] = req.body["longURL"];
-  //res.send("Ok");         // Respond with 'Ok' (we will replace this)
+
   res.redirect('/urls/' + key);
 });
+
+app.post("/register", (req, res) => {
+  console.log(users);
+  
+  let key = generateRandomString();
+
+  users[key] = {
+    id: key,
+    email: req.body["email"],
+    password: req.body["password"],
+  };
+
+  const { email } = req.body;
+
+  let user_id = userByEmail(email);
+
+  res.cookie("user", user_id);
+  console.log(user_id, users);
+
+  //res.redirect('/urls');
+
+  
+});
+
+
+
+
+
+
+// ██╗   ██╗██████╗ ██╗     ███████╗
+// ██║   ██║██╔══██╗██║     ██╔════╝
+// ██║   ██║██████╔╝██║     ███████╗
+// ██║   ██║██╔══██╗██║     ╚════██║
+// ╚██████╔╝██║  ██║███████╗███████║
+//  ╚═════╝ ╚═╝  ╚═╝╚══════╝╚══════╝
+                                 
+
+
+
 
 app.post("/urls/:shortURL/delete", (req, res) => {
   let key = req.params.shortURL;
@@ -122,14 +204,31 @@ let generateRandomString = function() {
   return random_string;
 };
 
-// cookie
+
+
+//  ██████╗ ██████╗  ██████╗ ██╗  ██╗██╗███████╗
+// ██╔════╝██╔═══██╗██╔═══██╗██║ ██╔╝██║██╔════╝
+// ██║     ██║   ██║██║   ██║█████╔╝ ██║█████╗
+// ██║     ██║   ██║██║   ██║██╔═██╗ ██║██╔══╝
+// ╚██████╗╚██████╔╝╚██████╔╝██║  ██╗██║███████╗
+//  ╚═════╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═╝╚═╝╚══════╝
+// + LOGIN AND LOGOUT
 app.post("/login", (req, res) => {
-  const { username } = req.body;
+  const { email } = req.body;
+  console.log(email);
+  // const user_id = userByEmail(users, email);
+  // const user = users[user_id];
+  // if (password === user[password]) {
+    res.cookie("user", email);
 
-  res.cookie("username", username);
-  res.cookie("isAuthenticated", true);
+    res.redirect('/urls');
+  // } else {
+  //   res.redirect('/register');
+  // }
 
-  res.redirect('/urls');
+  // res.cookie("isAuthenticated", true);
+
+  
 });
 
 
@@ -143,5 +242,7 @@ app.post("/logout", (req, res) => {
 
   res.redirect('/urls');
 });
+
+
 
 

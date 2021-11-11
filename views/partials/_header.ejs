@@ -12,13 +12,15 @@
     </div>
 
 
-     
-      <% if (!username) { %> 
+
+      <% if (!user) { %> 
         <form action="/login" method="post" >
-          <input type="text" id="username" name="username">
+          <a class="navbar-brand" href="/urls"> a, <% user %> </a>
+          <input type="text" id="email" name="email">
           <button type="submit" class="btn btn-primary">Login</button> 
         </form>
       <% } else { %>
+        <p><%= user %> </p>
 			<form action="/logout" method="POST">
 				<button type="submit">Logout</button>
 			</form>
